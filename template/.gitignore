@@ -1,0 +1,8 @@
+tmp/
+.env
+.env.local
+*.log
+
+# kişisel, paylaşılmaz
+CLAUDE.local.md
+.claude/settings.local.json

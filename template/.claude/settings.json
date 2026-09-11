@@ -1,0 +1,27 @@
+{
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
+  "permissions": {
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push * --force*)",
+      "Bash(git push *-f)",
+      "Bash(git push *-f *)",
+      "Bash(git reset --hard*)",
+      "Read(./.env)",
+      "Edit(./.env)",
+      "Write(./.env)",
+      "Edit(./tmp/**)",
+      "Write(./tmp/**)"
+    ],
+    "ask": [
+      "Bash(docker compose down -v*)",
+      "Bash(docker compose * down -v*)",
+      "Bash(git clean*)",
+      "Bash(rm -rf*)"
+    ]
+  }
+}

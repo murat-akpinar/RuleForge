@@ -1,205 +1,56 @@
-![Claude Code](https://img.shields.io/badge/claude_code-CLAUDE.md-D97757?logo=anthropic&logoColor=ffffff)
-![Cursor](https://img.shields.io/badge/cursor-.cursorrules-000000?logo=cursor&logoColor=ffffff)
-![Windsurf](https://img.shields.io/badge/windsurf-.windsurfrules-0EA5E9?logoColor=ffffff)
-![Copilot](https://img.shields.io/badge/copilot-instructions.md-4B32C3?logo=githubcopilot&logoColor=ffffff)
-![Markdown](https://img.shields.io/badge/format-Markdown-000000?logo=markdown&logoColor=ffffff)
+![Claude Code](https://img.shields.io/badge/claude_code-2.1%2B-D97757?logo=anthropic&logoColor=ffffff)
+![Docker](https://img.shields.io/badge/docker-compose-2496ED?logo=docker&logoColor=ffffff)
+![git-cliff](https://img.shields.io/badge/changelog-git--cliff-000000)
 
-# AI Engineering Rules
+# RuleForge
 
-AI coding agent'larının (Claude, Cursor, Windsurf, Copilot vb.) junior gibi değil **senior engineer gibi** davranmasını sağlayan kural seti.
+Boş bir dizine kopyalanıp Claude Code ile projeye başlamak için hazırlanmış şablon. Amaç: **önce kararlar, sonra iskelet, en son kod.**
 
----
-
-## Kurulum
-
-`.rules/` klasörünü ve `CLAUDE.md`'yi projenizin root'una kopyalayın:
+## Kullanım
 
 ```bash
-cp -r .rules /sizin-projeniz/
-cp CLAUDE.md /sizin-projeniz/
+cp -r ~/GIT/RuleForge/template/. ~/yeni-projem/
+cd ~/yeni-projem && claude
 ```
 
-İlk session'da Claude otomatik olarak projenizi tarar ve `project_context.md` oluşturur. Sonraki session'larda bu dosyayı okur — projeyi her seferinde yeniden taramaz.
+`docs/PROJECT.md` boş olduğu için Claude `kurulum` skill'ini çalıştırır:
 
----
-
-## Hangi Tool, Nasıl Kullanır?
-
-### Claude Code
-`CLAUDE.md` dosyası zaten hazır — kopyalamanız yeterli. `@` referansları rule dosyalarını otomatik yükler.
-
-### Cursor
-`.cursorrules` dosyasına ekleyin:
 ```
-Read and follow the rules in .rules/ai-agent.rules.md before every task.
-For backend: also follow .rules/backend.rules.md
-For frontend: also follow .rules/frontend.rules.md
-For security-sensitive work: also follow .rules/security.rules.md
+keşif → kararlar (ADR) → iskelet → todo.md → ilk commit → dur
 ```
 
-### Windsurf
-`.windsurfrules` dosyasına aynı şekilde yazın.
+Uygulama kodu bu aşamada yazılmaz. Container'ları ayağa kaldırmak bile `docs/todo.md`'nin ilk kutucuğudur.
 
-### Cline / Roo Code
-`.clinerules` dosyasına yazın.
+## İçindekiler
 
-### Copilot
-`.github/copilot-instructions.md` dosyasına yazın.
-
----
-
-## Hangi Dosyayı Ne Zaman Yüklersiniz?
-
-| Görev | Yüklenecek Rule'lar |
+| Dosya | Ne yapar |
 |---|---|
-| Her zaman | `ai-agent` + `token-optimization` + `security` + `project-context` |
-| Backend feature | + `backend` |
-| Frontend feature | + `frontend` |
-| API tasarımı | + `api` + `security` |
-| Veritabanı değişikliği | + `database` |
-| Docker / deploy | + `docker` + `devops` |
-| Kod incelemesi | + `clean-code` + `security` |
-| Bug fix | + `error-handling` |
-| Test yazımı | + `testing` |
-| Performans sorunu | + `performance` + `database` |
-| Yeni servis tasarımı | + `architecture` + `scalability` |
-| Sprint / planlama | + `project-manager` |
+| `CLAUDE.md` | Her oturumda yüklenen proje kuralları: dil, iş akışı, commit protokolü, sınırlar |
+| `.claude/settings.json` | Claude imzasını kapatır, tehlikeli komutları engeller veya onaya bağlar |
+| `.claude/rules/docker.md` | Yalnızca Dockerfile / compose / nginx dosyalarına dokunulurken yüklenir |
+| `.claude/rules/security.md` | Yalnızca kaynak dosyalara dokunulurken yüklenir: OWASP + SonarQube kuralları |
+| `.claude/skills/kurulum/` | Karar fazını yürüten kurulum akışı |
+| `docs/PROJECT.md` | Amaç, v1 kapsamı, bilerek kapsam dışı bırakılanlar |
+| `docs/MAP.md` | Dizinler, feature indeksi, ortak yardımcılar |
+| `docs/todo.md` | Fazlar ve kabul kriterli kutucuklar |
+| `docs/decisions/` | Altyapı kararları (ADR) |
+| `cliff.toml` | CHANGELOG üretimi, Türkçe grup başlıkları |
+| `tmp/` | Kaynak materyal. Git'e ve imaja girmez, Claude yalnızca okur |
 
-> **İpucu:** İkiden fazla ek rule yüklemenize nadiren gerek olur. Token bütçesini koruyun.
+## Çalışma düzeni
 
----
+- **Kutucuk döngüsü:** tek kutucuk → doğrula (build, kabul kriteri, test, lint) → `[x]` → `MAP.md` güncelle → CHANGELOG ile tek commit → push → durum özeti → `/clear`.
+- **Faz kapanışı:** her fazın son kutucuğu güvenlik ve test kapanışıdır. Kapsam, bağımlılık taraması, imaj taraması, sır sızıntısı kontrolü geçmeden sonraki faza geçilmez.
+- **Docker:** host'a yalnızca nginx port açar, tüm trafik oradan geçer. Sabit imaj sürümü, multi-stage build, root olmayan kullanıcı, her serviste healthcheck.
+- **Kimlik:** commit'ler yalnızca senin git kimliğinle atılır. `Co-Authored-By`, `Generated with Claude` ve `Claude-Session` satırları çıkmaz; kurulum ilk commit'ten sonra bunu doğrular.
+- **Kod:** fonksiyonel ve tekrarsız. Yorum yalnızca "neden" açık değilse. Feature blokları `--- START FEATURE: <ad> ---` ile işaretlenir, `MAP.md` bu adlara referans verir.
 
-## Rule Dosyaları
+## Gereksinimler
 
-```
-.rules/
-├── ai-agent.rules.md           ← Her zaman yükle
-├── token-optimization.rules.md ← Her zaman yükle
-├── security.rules.md           ← Her zaman yükle
-├── project-context.rules.md    ← Her zaman yükle (session bootstrap)
-│
-├── backend.rules.md
-├── frontend.rules.md
-├── database.rules.md
-├── api.rules.md
-├── docker.rules.md
-├── testing.rules.md
-├── performance.rules.md
-├── architecture.rules.md
-├── error-handling.rules.md
-├── monitoring.rules.md
-├── scalability.rules.md
-├── clean-code.rules.md
-├── code-style.rules.md
-├── git.rules.md
-├── devops.rules.md
-├── documentation.rules.md
-├── project-manager.rules.md
-└── startup.rules.md
-```
+- Claude Code 2.1+ (`.claude/rules/` ve `paths:` desteği için)
+- Docker Compose v2+
+- [git-cliff](https://git-cliff.org)
 
----
+## Eski kural seti
 
-## Token Budget
-
-```
-Minimal  (quick tasks):   ai-agent + token-optimization + 1 domain   ~4k tokens
-Standard (feature dev):   baseline + architecture + backend/frontend  ~10k tokens
-Full     (system design): tüm ilgili rule'lar                         ~25k tokens
-```
-
----
-
-## Workflow Örnekleri
-
-**Login feature (JWT + OAuth):**
-```
-Yükle: ai-agent + security + backend + api
-1. Mevcut auth pattern'i analiz et
-2. JWT refresh token rotasyonu uygula
-3. Rate limiting ekle
-4. Human review flag: "Auth değişikliği — merge öncesi inceleme gerekli"
-```
-
-**Performans sorunu (8 saniyelik checkout):**
-```
-Yükle: ai-agent + performance + database
-1. Kör optimize etme — önce ölç
-2. N+1 query kontrolü
-3. Cache fırsatlarını belirle
-4. Fix sonrası alert eşiği tanımla
-```
-
-**Yeni servis tasarımı (notification service):**
-```
-Yükle: ai-agent + architecture + backend + scalability + monitoring
-1. ADR yaz: neden ayrı servis?
-2. Async queue pattern tanımla
-3. SLO ve alerting stratejisi belirle
-4. İnsan onayı gereken kararları listele
-```
-
-**Risk taşıyan değişiklik (multi-tenant DB migration):**
-```
-Yükle: ai-agent + database + architecture + security
-1. STOP — irreversible olarak sınıflandır
-2. Additive → backfill → switch adımlarıyla plan yap
-3. Her query'de tenant izolasyonu doğrula
-4. Rollback script hazırla — insan onayı olmadan çalıştırma
-```
-
----
-
-## Multi-Agent Modeli
-
-```
-┌──────────────────────────────────────────┐
-│           ORCHESTRATOR AGENT              │
-│  ai-agent + project-manager               │
-└──────┬──────────────┬────────────────────┘
-       │              │
-  ┌────▼────┐    ┌────▼────┐    ┌──────────┐
-  │ARCHITECT│    │  CODER  │    │ REVIEWER │
-  │ arch    │    │ backend │    │ security │
-  │ scale   │    │ frontend│    │ clean-cod│
-  └────┬────┘    └────┬────┘    └────┬─────┘
-       └──────────────┴──────────────┘
-                      │
-               ┌──────▼──────┐
-               │  QA AGENT   │
-               │ testing     │
-               │ monitoring  │
-               └─────────────┘
-```
-
-Handoff payload her agent çıkışında şunları içerir:
-`completed` · `artifacts` · `decisions` · `blockers` · `risks`
-
----
-
-## Yeni Rule Dosyası Şablonu
-
-```markdown
-## 1. Role Definition
-## 2. Core Principles
-## 3. Hard Rules
-## 4. Preferred Patterns
-## 5. AI Decision Rules
-## 6. Code Generation Standards
-## 7. Anti-Patterns
-## 8. Output Expectations
-```
-
-**Planlanan eklemeler:** `mobile.rules.md` · `ml.rules.md` · `data-pipeline.rules.md` · `compliance.rules.md`
-
----
-
-## Startup vs Enterprise
-
-| | Startup | Enterprise |
-|---|---|---|
-| Öncelik | `startup` → `ai-agent` → `security` | `security` → `architecture` → hepsi |
-| Test | %60 kritik path | %80+ CI gate |
-| Docs | README + runbook | ADR zorunlu, API spec |
-| DevOps | PaaS kabul | Full CI/CD + security gate |
-| Monitoring | Sentry + uptime | SLO + error budget |
+`.rules/` altındaki 22 dosyalık eski set, `@` referanslarının elle açılıp kapatıldığı döneme ait. Yerini `.claude/rules/` (yola göre otomatik yüklenen kurallar) ve skill'ler aldı. Referans olarak duruyor, yeni projelerde kullanılmıyor.
