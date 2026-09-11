@@ -51,6 +51,34 @@ Uygulama kodu bu aşamada yazılmaz. Container'ları ayağa kaldırmak bile `doc
 - Docker Compose v2+
 - [git-cliff](https://git-cliff.org)
 
+## Doğrulama
+
+Şablon boş bir dizine kopyalanıp uçtan uca çalıştırıldı: backend (FastAPI) + db (PostgreSQL) + nginx, kurulum akışının ürettiği yapıyla.
+
+_Test ortamı: Docker 29.7.2 · Compose v5.5.1 · git-cliff 2.14.1 · Claude Code 2.1.267 · 2026-09-12_
+
+| Kontrol | Sonuç |
+|---|---|
+| Kopyalama, gizli dosyalar dahil | 14 dosya eksiksiz |
+| `.env` ve `tmp/` git'e girmiyor | tüm geçmişte iz yok |
+| `docker compose config --quiet` | temiz |
+| Başlangıç sırası db → backend → nginx | healthcheck zinciriyle sırayla açıldı |
+| nginx üzerinden `/api/health` | `200`, `{"status":"ok"}` |
+| backend ve db host'a kapalı | `:8000` ve `:5432` erişilemez, yalnızca nginx portu açık |
+| Root olmayan kullanıcı | backend `app`, nginx `nginx` |
+| Güvenlik header'ları | `nosniff`, `DENY`, `Referrer-Policy` geldi |
+| Dev override: bind mount + hot reload | kod değişti, yanıt yeniden başlatmadan güncellendi |
+| `-f compose.yaml` (prod benzeri) | override yüklenmedi |
+| Kutucuk akışı: CHANGELOG + commit | tek commit, doğru kimlik, Claude izi yok |
+| `cliff.toml` çıktısı | Türkçe gruplarla üretildi, `--bumped-version` → `0.1.0` |
+
+Test sırasında bulunup düzeltilen iki hata:
+
+1. **Boş depoda ilk commit kırıktı.** `git cliff`, henüz commit'i olmayan depoda `reference 'refs/heads/main' not found` ile düşüyordu. İlk commit artık ters sırada: önce commit, sonra changelog, sonra `--amend`. Ayrıca `git init -b main` eklendi.
+2. **Kökteki `.dockerignore` alt build context'lere uygulanmıyordu.** `build: ./backend` yazıldığında Docker dosyayı `backend/` içinde arar; `.env` veya `tmp/` imaja sızabilirdi. Artık her bileşen kendi `.dockerignore`'unu taşıyor.
+
+Hata değil ama bilinmesi gereken: `server_tokens off` yalnızca sürüm numarasını gizler, `Server: nginx` başlığı kalır. Kaldırmak `headers-more` modülü ister, standart imajda yoktur.
+
 ## Geçmiş
 
 Depo önceden `.rules/` altında 22 dosyalık, `CLAUDE.md`'deki `@` referanslarının elle açılıp kapatıldığı bir kural setiydi. Yerini yola göre otomatik yüklenen `.claude/rules/` dosyaları ve skill'ler aldı; eski set kaldırıldı. Git geçmişinde duruyor.
