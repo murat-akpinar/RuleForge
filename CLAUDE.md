@@ -1,69 +1,21 @@
-# CLAUDE.md — Project instructions (Claude Code)
+# RuleForge
 
-This file defines which rule files Claude Code should load for each session.
-Rules are modular: enable extra `@` lines as needed by task, or mention them in chat.
+Bu depo tek bir şey barındırır: `template/`, boş bir dizine kopyalanıp Claude Code ile projeye başlamak için kullanılan şablon. Buradaki kurallar **şablonu geliştirirken** geçerlidir; şablonun kendi kuralları `template/CLAUDE.md` içindedir.
 
----
+## Şablonu değiştirirken
+- `template/CLAUDE.md` 200 satırın altında kalır. Yalnızca belirli dosyalarda geçerli olan kural oraya değil, `paths:` frontmatter'ı olan bir `.claude/rules/*.md` dosyasına yazılır.
+- Bir kural hem `template/CLAUDE.md` hem bir rules dosyasında yer alıyorsa çelişmediğinden emin ol. Çelişen talimatlarda Claude birini rastgele seçer.
+- Yeni kural eklemeden önce sor: bu, modelin varsayılan davranışından gerçekten farklı mı? Değilse ekleme, sadece token harcar.
 
-## Always load (baseline)
-
-These files form the baseline **in this order**. Treat them as required for judgement, token discipline, and security.
-
-@.rules/ai-agent.rules.md
-@.rules/token-optimization.rules.md
-@.rules/security.rules.md
-@.rules/project-context.rules.md
-
----
-
-## By task type (template — remove `#` to enable)
-
-```text
-# Backend
-# @.rules/backend.rules.md
-
-# Frontend
-# @.rules/frontend.rules.md
-
-# Database / schema / queries
-# @.rules/database.rules.md
-
-# REST / GraphQL design
-# @.rules/api.rules.md
-
-# Dockerfile / Compose
-# @.rules/docker.rules.md
-# @.rules/devops.rules.md
-
-# Tests
-# @.rules/testing.rules.md
-
-# Performance
-# @.rules/performance.rules.md
-
-# Architecture / new services
-# @.rules/architecture.rules.md
-# @.rules/scalability.rules.md
-
-# Errors / debugging
-# @.rules/error-handling.rules.md
-
-# Code quality / review
-# @.rules/clean-code.rules.md
-# @.rules/code-style.rules.md
-
-# Git / PR workflow
-# @.rules/git.rules.md
-
-# Documentation
-# @.rules/documentation.rules.md
-
-# Planning / estimation
-# @.rules/project-manager.rules.md
-
-# Early-stage startup trade-offs
-# @.rules/startup.rules.md
-
-# Observability
-# @.rules/monitoring.rules.md
+## Değişiklikten sonra doğrula
+```bash
+python3 -c "import json,pathlib; json.loads(pathlib.Path('template/.claude/settings.json').read_text())"
+python3 -c "import re,yaml,pathlib,glob
+for f in glob.glob('template/.claude/**/*.md', recursive=True):
+    m = re.match(r'^---\n(.*?)\n---\n', pathlib.Path(f).read_text(), re.S)
+    if m: yaml.safe_load(m.group(1))"
 ```
+`cliff.toml` değiştiyse geçici bir depoda birkaç commit atıp `git cliff --with-commit "feat: x" -o CHANGELOG.md` çıktısına bak.
+
+## Dil
+Dokümanlar ve commit açıklamaları Türkçe, kod ve tanımlayıcılar İngilizce. Commit başlığı Conventional Commits.

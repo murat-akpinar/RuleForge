@@ -51,6 +51,6 @@ Uygulama kodu bu aşamada yazılmaz. Container'ları ayağa kaldırmak bile `doc
 - Docker Compose v2+
 - [git-cliff](https://git-cliff.org)
 
-## Eski kural seti
+## Geçmiş
 
-`.rules/` altındaki 22 dosyalık eski set, `@` referanslarının elle açılıp kapatıldığı döneme ait. Yerini `.claude/rules/` (yola göre otomatik yüklenen kurallar) ve skill'ler aldı. Referans olarak duruyor, yeni projelerde kullanılmıyor.
+Depo önceden `.rules/` altında 22 dosyalık, `CLAUDE.md`'deki `@` referanslarının elle açılıp kapatıldığı bir kural setiydi. Yerini yola göre otomatik yüklenen `.claude/rules/` dosyaları ve skill'ler aldı; eski set kaldırıldı. Git geçmişinde duruyor.
