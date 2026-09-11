@@ -12,7 +12,7 @@ Sıra: keşif → kararlar → iskelet → todo → ilk commit. Her fazın sonun
 ## 0. Ön kontrol
 - Dizinde şablon dışında dosya varsa dur ve sor: burası boş bir proje mi?
 - `git config user.name` ve `git config user.email` tanımlı mı bak. Tanımlı değilse dur ve sor, kimlik uydurma.
-- `git rev-parse --git-dir` başarısızsa `git init`.
+- `git rev-parse --git-dir` başarısızsa `git init -b main`. Depo varsa ve dal adı `master` ise `git branch -M main`.
 
 ## 1. Keşif
 Kullanıcıya tek tek sor, cevapları biriktir:
@@ -40,6 +40,7 @@ Kararlara göre üret, uygulama kodu yazma:
 - `nginx/Dockerfile` ve `nginx/nginx.conf`: `nginxinc/nginx-unprivileged`, container içinde 8080.
 - `compose.yaml` ve `compose.override.yaml`: host'a yalnızca nginx portu, healthcheck, `depends_on: condition: service_healthy`.
 - `.env.example`: gereken tüm değişken isimleri. `.env` dosyasını sen oluşturma, kullanıcı doldursun.
+- Her bileşen dizinine kendi `.dockerignore`'u (kökteki dosya alt context'lere uygulanmaz).
 - Ayrıntılar `.claude/rules/docker.md` dosyasındadır, ona uy.
 
 Doğrula: `docker compose config --quiet` hatasız dönmeli. Çıktı basan biçimi kullanma, env değerlerini gösterir.
@@ -54,12 +55,13 @@ Taslağı kullanıcıya göster, düzeltmelerini al, sonra yaz.
 ## 5. İlk commit
 - `docs/MAP.md`'yi oluşturulan dizinlere göre doldur.
 - Remote'u sor (adres ve depo gizli mi). Verilmezse push atlanır, kullanıcıya söylenir.
-- Commit:
+- Commit. Boş depoda git-cliff çalışmaz (`reference 'refs/heads/main' not found`), bu yüzden ilk commit'te sıra terstir: önce commit, sonra changelog, sonra amend. Sonraki kutucuklarda `CLAUDE.md`'deki normal sıra geçerlidir.
   ```
   git add -A
-  git cliff --with-commit "chore: proje iskeleti" -o CHANGELOG.md
-  git add CHANGELOG.md
   git commit -m "chore: proje iskeleti"
+  git cliff -o CHANGELOG.md
+  git add CHANGELOG.md
+  git commit --amend --no-edit
   ```
 - Kimlik kontrolü: `git log -1 --format='%an <%ae>%n%B'` çıktısında kullanıcının kimliği görünmeli, `grep -i claude` boş dönmeli. Claude izi varsa commit'i `git commit --amend` ile düzelt ve kullanıcıyı uyar.
 - Remote varsa `git push -u origin <dal>`.

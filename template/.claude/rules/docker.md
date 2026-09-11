@@ -19,7 +19,7 @@ paths:
 - nginx için `nginxinc/nginx-unprivileged` kullanılır; resmi `nginx` imajı master process'i root ile çalıştırır. Bu imaj container içinde 8080 dinler.
 - Multi-stage build: derleme araçları runtime imajında kalmaz.
 - Container root ile çalışmaz (`USER app`). Resmi postgres/redis imajlarına `user:` verme, kendileri düşürür.
-- `.dockerignore` her zaman `tmp/`, `.env`, `.git/` içerir.
+- `.dockerignore` build context'in kökünden okunur. `build: ./backend` yazıldığında kökteki `.dockerignore` **geçerli değildir**; her bileşen kendi `.dockerignore`'unu taşır (en az `.env`, `tmp/`, testler, bağımlılık dizinleri). Kökteki dosya yalnızca `context: .` kullanıldığında devreye girer.
 
 ## Sağlık ve başlangıç sırası
 - Her servisin `healthcheck`'i olur, `depends_on` → `condition: service_healthy`. Aksi halde nginx backend hazır olmadan açılır ve 502 döner.
