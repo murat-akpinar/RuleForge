@@ -26,10 +26,11 @@ Uygulama kodu bu aşamada yazılmaz. Container'ları ayağa kaldırmak bile `doc
 | Dosya | Ne yapar |
 |---|---|
 | `CLAUDE.md` | Her oturumda yüklenen proje kuralları: dil, iş akışı, commit protokolü, sınırlar |
-| `.claude/settings.json` | Claude imzasını kapatır, tehlikeli komutları engeller veya onaya bağlar |
+| `.claude/settings.json` | Claude imzasını kapatır, tehlikeli komutları engeller veya onaya bağlar; Sonnet ana model, Opus danışman (`advisorModel`), Haiku yalnızca `kesif` alt ajanında |
 | `.claude/rules/docker.md` | Yalnızca Dockerfile / compose / nginx dosyalarına dokunulurken yüklenir |
 | `.claude/rules/security.md` | Yalnızca kaynak dosyalara dokunulurken yüklenir: OWASP + SonarQube kuralları |
 | `.claude/skills/kurulum/` | Karar fazını yürüten kurulum akışı |
+| `.claude/agents/kesif.md` | Haiku ile çalışan salt okunur arama ajanı; tarama ana modelin bağlamını doldurmaz |
 | `docs/PROJECT.md` | Amaç, v1 kapsamı, bilerek kapsam dışı bırakılanlar |
 | `docs/MAP.md` | Dizinler, feature indeksi, ortak yardımcılar |
 | `docs/todo.md` | Fazlar ve kabul kriterli kutucuklar |
@@ -44,6 +45,23 @@ Uygulama kodu bu aşamada yazılmaz. Container'ları ayağa kaldırmak bile `doc
 - **Docker:** host'a yalnızca nginx port açar, tüm trafik oradan geçer. Sabit imaj sürümü, multi-stage build, root olmayan kullanıcı, her serviste healthcheck.
 - **Kimlik:** commit'ler yalnızca senin git kimliğinle atılır. `Co-Authored-By`, `Generated with Claude` ve `Claude-Session` satırları çıkmaz; kurulum ilk commit'ten sonra bunu doğrular.
 - **Kod:** fonksiyonel ve tekrarsız. Yorum yalnızca "neden" açık değilse. Feature blokları `--- START FEATURE: <ad> ---` ile işaretlenir, `MAP.md` bu adlara referans verir.
+
+## Model dağılımı
+
+Bayrak gerekmez; ayarlar `.claude/settings.json` ve `.claude/agents/kesif.md` içinden kendiliğinden yüklenir.
+
+| Model | Rol | Nasıl devreye girer |
+|---|---|---|
+| Sonnet | Oturumu yönetir, kodu yazar | `"model": "sonnet"`. Kod yazan alt ajanlar da bunu kullanır |
+| Opus | Danışman: plan incelemesi, tekrar eden hata, bitirmeden önce kontrol | `"advisorModel": "opus"`. Ne zaman danışılacağına Sonnet karar verir |
+| Haiku | Dosya ve doküman taraması, paralel | `kesif` alt ajanı (`model: haiku`, yalnızca `Read, Grep, Glob`) |
+
+Bilinmesi gerekenler:
+
+- `--model`, `ANTHROPIC_MODEL` veya oturum içinde `/model` ana modeli değiştirir.
+- Hangi alt ajanın çağrılacağını ana model seçer. Hazır Explore ajanını seçerse tarama Haiku'da değil, ana modelde yapılır.
+- `advisorModel` ve `--advisor` yardım çıktısında görünmez. İlk oturumda `/advisor` ile danışmanın açık olduğunu kontrol et.
+- `CLAUDE_CODE_SUBAGENT_MODEL=haiku` bilerek kullanılmadı: tüm alt ajanları, kod yazanlar dahil, Haiku'ya düşürür.
 
 ## Gereksinimler
 
